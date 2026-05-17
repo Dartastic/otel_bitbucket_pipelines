@@ -1,0 +1,22 @@
+// Licensed under the Apache License, Version 2.0
+// Copyright 2025, Mindful Software LLC, All rights reserved.
+
+import 'package:otel_bitbucket_pipelines/otel_bitbucket_pipelines.dart';
+import 'package:test/test.dart';
+
+void main() {
+  group('otel_bitbucket_pipelines', () {
+    test('suppression toggles in zone', () async {
+      expect(bitbucketPipelinesInstrumentationSuppressed(), isFalse);
+      await runWithoutBitbucketPipelinesInstrumentationAsync(() async {
+        expect(bitbucketPipelinesInstrumentationSuppressed(), isTrue);
+      });
+      expect(bitbucketPipelinesInstrumentationSuppressed(), isFalse);
+    });
+
+    test('BitbucketPipelinesResult fields default null', () {
+      const r = BitbucketPipelinesResult();
+      expect(r.statusCode, isNull);
+    });
+  });
+}
