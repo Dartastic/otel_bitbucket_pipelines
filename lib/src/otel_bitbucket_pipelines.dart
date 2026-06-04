@@ -2,7 +2,6 @@
 // Copyright 2025-2026 Mindful Software LLC d/b/a Dartastic.io, All rights reserved.
 
 import 'package:dartastic_opentelemetry/dartastic_opentelemetry.dart';
-import 'package:dartastic_opentelemetry_api/dartastic_opentelemetry_api.dart';
 
 import 'otel_bitbucket_pipelines_suppression.dart';
 
@@ -59,55 +58,73 @@ Future<T> tracedBitbucketPipelines<T>({
       tracer ?? OTel.tracerProvider().getTracer('otel_bitbucket_pipelines');
   final span = t.startSpan('bbpipelines $operation', kind: SpanKind.client);
   try {
-    span.setStringAttribute('rpc.system', 'bitbucket');
-    span.setStringAttribute('cicd.platform', 'bitbucket');
+    span.addAttributes(
+        OTel.attributes([OTel.attributeString('rpc.system', 'bitbucket')]));
+    span.addAttributes(
+        OTel.attributes([OTel.attributeString('cicd.platform', 'bitbucket')]));
     final r = await invoke();
     final res = r.result;
     if (res != null) {
       if (res.workspace != null) {
-        span.setStringAttribute('bitbucket.workspace', res.workspace!);
+        span.addAttributes(OTel.attributes(
+            [OTel.attributeString('bitbucket.workspace', res.workspace!)]));
       }
       if (res.repository != null) {
-        span.setStringAttribute('bitbucket.repository', res.repository!);
+        span.addAttributes(OTel.attributes(
+            [OTel.attributeString('bitbucket.repository', res.repository!)]));
       }
       if (res.pipelineUuid != null) {
-        span.setStringAttribute('cicd.pipeline.run.id', res.pipelineUuid!);
+        span.addAttributes(OTel.attributes(
+            [OTel.attributeString('cicd.pipeline.run.id', res.pipelineUuid!)]));
       }
       if (res.buildNumber != null) {
-        span.setIntAttribute('cicd.pipeline.run.name', res.buildNumber!);
+        span.addAttributes(OTel.attributes(
+            [OTel.attributeInt('cicd.pipeline.run.name', res.buildNumber!)]));
       }
       if (res.pipelineStatus != null) {
-        span.setStringAttribute('cicd.pipeline.run.state', res.pipelineStatus!);
+        span.addAttributes(OTel.attributes([
+          OTel.attributeString('cicd.pipeline.run.state', res.pipelineStatus!)
+        ]));
       }
       if (res.stepUuid != null) {
-        span.setStringAttribute('cicd.task.run.id', res.stepUuid!);
+        span.addAttributes(OTel.attributes(
+            [OTel.attributeString('cicd.task.run.id', res.stepUuid!)]));
       }
       if (res.stepName != null) {
-        span.setStringAttribute('cicd.task.name', res.stepName!);
+        span.addAttributes(OTel.attributes(
+            [OTel.attributeString('cicd.task.name', res.stepName!)]));
       }
       if (res.stepStatus != null) {
-        span.setStringAttribute('cicd.task.run.state', res.stepStatus!);
+        span.addAttributes(OTel.attributes(
+            [OTel.attributeString('cicd.task.run.state', res.stepStatus!)]));
       }
       if (res.runnerLabel != null) {
-        span.setStringAttribute('cicd.worker.name', res.runnerLabel!);
+        span.addAttributes(OTel.attributes(
+            [OTel.attributeString('cicd.worker.name', res.runnerLabel!)]));
       }
       if (res.branch != null) {
-        span.setStringAttribute('vcs.ref.head.name', res.branch!);
+        span.addAttributes(OTel.attributes(
+            [OTel.attributeString('vcs.ref.head.name', res.branch!)]));
       }
       if (res.commit != null) {
-        span.setStringAttribute('vcs.ref.head.revision', res.commit!);
+        span.addAttributes(OTel.attributes(
+            [OTel.attributeString('vcs.ref.head.revision', res.commit!)]));
       }
       if (res.statusCode != null) {
-        span.setIntAttribute('http.response.status_code', res.statusCode!);
+        span.addAttributes(OTel.attributes(
+            [OTel.attributeInt('http.response.status_code', res.statusCode!)]));
       }
       if (res.errorCode != null) {
-        span.setStringAttribute('bbpipelines.error.code', res.errorCode!);
+        span.addAttributes(OTel.attributes(
+            [OTel.attributeString('bbpipelines.error.code', res.errorCode!)]));
       }
       final fail = res.errorCode != null ||
           (res.statusCode != null && res.statusCode! >= 400);
       if (fail) {
-        span.setStringAttribute(
-            ErrorResource.errorType.key, res.errorCode ?? 'bitbucket.error');
+        span.addAttributes(OTel.attributes([
+          OTel.attributeString(
+              ErrorResource.errorType.key, res.errorCode ?? 'bitbucket.error')
+        ]));
         span.setStatus(SpanStatusCode.Error, res.errorMessage);
       }
     }
