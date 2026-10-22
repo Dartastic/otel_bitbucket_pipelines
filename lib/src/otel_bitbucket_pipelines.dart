@@ -1,11 +1,12 @@
-// Licensed under the Dartastic Pro Software License Agreement.
+// Licensed under the Apache License, Version 2.0
 // Copyright 2025-2026 Mindful Software LLC d/b/a Dartastic.io, All rights reserved.
 
-import 'package:dartastic_opentelemetry/dartastic_opentelemetry.dart';
+import 'package:dartastic_opentelemetry_api/dartastic_opentelemetry_api.dart';
 
 import 'otel_bitbucket_pipelines_suppression.dart';
 
 class BitbucketPipelinesResult {
+  /// Creates a result.
   const BitbucketPipelinesResult({
     this.workspace,
     this.repository,
@@ -39,8 +40,13 @@ class BitbucketPipelinesResult {
   final String? errorMessage;
 }
 
+/// What a traced call returned: the value for the caller plus fields
+/// recorded on the span.
 class BitbucketPipelinesCallResult<T> {
+  /// Creates a call result.
   const BitbucketPipelinesCallResult({required this.value, this.result});
+
+  /// The value returned to the caller.
   final T value;
   final BitbucketPipelinesResult? result;
 }
@@ -48,82 +54,88 @@ class BitbucketPipelinesCallResult<T> {
 Future<T> tracedBitbucketPipelines<T>({
   required String operation,
   required Future<BitbucketPipelinesCallResult<T>> Function() invoke,
-  Tracer? tracer,
+  APITracer? tracer,
 }) async {
   if (bitbucketPipelinesInstrumentationSuppressed()) {
     final r = await invoke();
     return r.value;
   }
   final t =
-      tracer ?? OTel.tracerProvider().getTracer('otel_bitbucket_pipelines');
+      tracer ?? OTelAPI.tracerProvider().getTracer('otel_bitbucket_pipelines');
   final span = t.startSpan('bbpipelines $operation', kind: SpanKind.client);
   try {
-    span.addAttributes(
-        OTel.attributes([OTel.attributeString('rpc.system', 'bitbucket')]));
-    span.addAttributes(
-        OTel.attributes([OTel.attributeString('cicd.platform', 'bitbucket')]));
+    span.addAttributes(OTelAPI.attributes(
+        [OTelAPI.attributeString('rpc.system', 'bitbucket')]));
+    span.addAttributes(OTelAPI.attributes(
+        [OTelAPI.attributeString('cicd.platform', 'bitbucket')]));
     final r = await invoke();
     final res = r.result;
     if (res != null) {
       if (res.workspace != null) {
-        span.addAttributes(OTel.attributes(
-            [OTel.attributeString('bitbucket.workspace', res.workspace!)]));
+        span.addAttributes(OTelAPI.attributes(
+            [OTelAPI.attributeString('bitbucket.workspace', res.workspace!)]));
       }
       if (res.repository != null) {
-        span.addAttributes(OTel.attributes(
-            [OTel.attributeString('bitbucket.repository', res.repository!)]));
+        span.addAttributes(OTelAPI.attributes([
+          OTelAPI.attributeString('bitbucket.repository', res.repository!)
+        ]));
       }
       if (res.pipelineUuid != null) {
-        span.addAttributes(OTel.attributes(
-            [OTel.attributeString('cicd.pipeline.run.id', res.pipelineUuid!)]));
+        span.addAttributes(OTelAPI.attributes([
+          OTelAPI.attributeString('cicd.pipeline.run.id', res.pipelineUuid!)
+        ]));
       }
       if (res.buildNumber != null) {
-        span.addAttributes(OTel.attributes(
-            [OTel.attributeInt('cicd.pipeline.run.name', res.buildNumber!)]));
+        span.addAttributes(OTelAPI.attributes([
+          OTelAPI.attributeInt('cicd.pipeline.run.name', res.buildNumber!)
+        ]));
       }
       if (res.pipelineStatus != null) {
-        span.addAttributes(OTel.attributes([
-          OTel.attributeString('cicd.pipeline.run.state', res.pipelineStatus!)
+        span.addAttributes(OTelAPI.attributes([
+          OTelAPI.attributeString(
+              'cicd.pipeline.run.state', res.pipelineStatus!)
         ]));
       }
       if (res.stepUuid != null) {
-        span.addAttributes(OTel.attributes(
-            [OTel.attributeString('cicd.task.run.id', res.stepUuid!)]));
+        span.addAttributes(OTelAPI.attributes(
+            [OTelAPI.attributeString('cicd.task.run.id', res.stepUuid!)]));
       }
       if (res.stepName != null) {
-        span.addAttributes(OTel.attributes(
-            [OTel.attributeString('cicd.task.name', res.stepName!)]));
+        span.addAttributes(OTelAPI.attributes(
+            [OTelAPI.attributeString('cicd.task.name', res.stepName!)]));
       }
       if (res.stepStatus != null) {
-        span.addAttributes(OTel.attributes(
-            [OTel.attributeString('cicd.task.run.state', res.stepStatus!)]));
+        span.addAttributes(OTelAPI.attributes(
+            [OTelAPI.attributeString('cicd.task.run.state', res.stepStatus!)]));
       }
       if (res.runnerLabel != null) {
-        span.addAttributes(OTel.attributes(
-            [OTel.attributeString('cicd.worker.name', res.runnerLabel!)]));
+        span.addAttributes(OTelAPI.attributes(
+            [OTelAPI.attributeString('cicd.worker.name', res.runnerLabel!)]));
       }
       if (res.branch != null) {
-        span.addAttributes(OTel.attributes(
-            [OTel.attributeString('vcs.ref.head.name', res.branch!)]));
+        span.addAttributes(OTelAPI.attributes(
+            [OTelAPI.attributeString('vcs.ref.head.name', res.branch!)]));
       }
       if (res.commit != null) {
-        span.addAttributes(OTel.attributes(
-            [OTel.attributeString('vcs.ref.head.revision', res.commit!)]));
+        span.addAttributes(OTelAPI.attributes(
+            [OTelAPI.attributeString('vcs.ref.head.revision', res.commit!)]));
       }
       if (res.statusCode != null) {
-        span.addAttributes(OTel.attributes(
-            [OTel.attributeInt('http.response.status_code', res.statusCode!)]));
+        span.addAttributes(OTelAPI.attributes([
+          OTelAPI.attributeInt('http.response.status_code', res.statusCode!)
+        ]));
       }
       if (res.errorCode != null) {
-        span.addAttributes(OTel.attributes(
-            [OTel.attributeString('bbpipelines.error.code', res.errorCode!)]));
+        span.addAttributes(OTelAPI.attributes([
+          OTelAPI.attributeString('bbpipelines.error.code', res.errorCode!)
+        ]));
       }
       final fail = res.errorCode != null ||
           (res.statusCode != null && res.statusCode! >= 400);
       if (fail) {
-        span.addAttributes(OTel.attributes([
-          OTel.attributeString(
-              ErrorResource.errorType.key, res.errorCode ?? 'bitbucket.error')
+        span.addAttributes(OTelAPI.attributes([
+          OTelAPI.attributeString(
+              ErrorAttributes.errorType.key, res.errorCode ?? 'bitbucket.error')
         ]));
         span.setStatus(SpanStatusCode.Error, res.errorMessage);
       }
