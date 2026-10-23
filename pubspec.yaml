@@ -3,7 +3,7 @@ description: >-
   OpenTelemetry instrumentation for bitbucket_pipelines by Dartastic.io. Adds
   standard OpenTelemetry observability to applications that use
   bitbucket_pipelines.
-version: 0.1.0-wip
+version: 0.1.0
 repository: https://github.com/dartastic/otel_bitbucket_pipelines
 homepage: https://dartastic.io
 
